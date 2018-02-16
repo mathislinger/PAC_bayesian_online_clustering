@@ -1,18 +1,7 @@
-setwd("~/Desktop/ENSAE_MS/S2/PAC_bayesian_online_clustering")
-data = read.csv('data')
-data[1] <- NULL 
-
-mydata = data
-N_iterations = 500
-coeff = 2
-R = max(sqrt(rowSums(mydata^2)))
-K_max = 50
-
-?PACBO
 install.packages('PACBO')
 library('PACBO')
 
-# Exemple: generating 4 clusters of 100 points
+####### Create exemple: generating 4 clusters of 100 points
 set.seed(100)
 Nb <- 4
 d <- 5
@@ -22,13 +11,34 @@ Mean_vectors <- matrix(runif(d*Nb,min=-10, max=10),nrow=Nb,ncol=d, byrow=TRUE)
 mydata <- matrix(replicate(T, rmnorm(1, mean= Mean_vectors[sample(1:Nb, 1, prob = proportion),],
 varcov = diag(1,d))), nrow = T, byrow=T)
 R <- max(sqrt(rowSums(mydata^2)))
-##run the algorithm.
+
+####### run the algorithm.
 result <- PACBO(mydata, R,var_ind = TRUE, plot_ind = FALSE)
 result
 
-mydata[1:6,]
+####### Save results in dataframes to do the dataviz in Python
+setwd("~/Desktop/ENSAE_MS/S2/PAC_bayesian_online_clustering")
 
-#######Modification of the package to see the evolution of the clustering with online clustering
+# Put labels of clusters with data
+df = as.data.frame(mydata)
+
+for (i in 1:T){
+  df[,(i+d)] <- c(result$labels[[i]], rep(NaN,T-i))
+}
+write.csv(df, file = "data_and_labels")
+
+# Write centers
+
+result$centers
+
+
+
+# Save number of clusters
+nb_clusters = result$nb_of_clusters
+write.csv(nb_clusters, file = "nb_clusters")
+
+
+####### Modification of the package to see the evolution of the clustering with online clustering
 
 instantaneous_loss = function(centers, instant_observation){
   if (class(centers) != 'matrix'){
