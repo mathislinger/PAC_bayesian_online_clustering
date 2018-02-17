@@ -1,18 +1,12 @@
-library('PACBO')
 
 
 
-m_t
-  
-  
-  
-  
-  
+
 #####
+library('PACBO')
 setwd("~/Desktop/ENSAE_MS/S2/PAC_bayesian_online_clustering")
-coeff=2
-multiplier_R = 1.5
-Nb <- 4
+
+coeff = 2
 K_max = 50
 N_iterations = 500
 mydata <- read.csv('test.csv')
@@ -94,3 +88,40 @@ if (new_k == Nclusters[n-1]){
     m_t = kmeans(matrix(mydata[1:(t-1),],ncol=d), new_k, nstart=2, iter.max=10)$centers
   }
 }
+
+c_k_prime = t(apply(m_t,1, function(x) rmt(1, mean=x, S = diag(tau_proposal, d), df =3)))
+
+if (sum( sqrt(rowSums(c_k_prime^2)) < multiplier_R * R ) == new_k) {
+  log_numerator_prop = log(apply(matrix(1:Nclusters[n-1], ncol=1),1,function(x) dmt(Niter_centers[[n-1]][x,], mean = parameter_means_proposal[[n-1]][x,], S = diag(tau_proposal,d), df = 3)))
+  log_denominator_prop = log(apply(matrix(1:new_k, ncol=1),1,function(x) dmt(c_k_prime[x,], mean=m_t[x,], S = diag(tau_proposal,d), df = 3)))
+  log_numerator_prior = rep((log(gamma(d/2+1)) - (d/2)*log(pi) - d*log(multiplier_R*R)), new_k)
+  log_denominator_prior = rep((log(gamma(d/2+1)) - (d/2)*log(pi) - d*log(multiplier_R*R)), Nclusters[n-1])
+  
+  ln_division = sum(c(log_numerator_prior, log_numerator_prop)-c(log_denominator_prior, log_denominator_prop))
+  proposal_loss_temp[1:(t-1)] = apply(matrix(mydata[1:(t-1),], nrow = t-1), 1, function (x) instantaneous_loss(c_k_prime, x))
+  s_loss_prime = sum(proposal_loss_temp) + 0.5 * sum(lambda_2 * (proposal_loss_temp - predicted_loss)^2)
+  ln_accept_ratio=(-lambda_1[t-1]*(s_loss_prime-sum_loss[n-1]))+ln_division+log(transition_probability(new_k, Nclusters[n-1],K_max))-log(transition_probability(Nclusters[n-1], new_k, K_max))
+}else{
+  ln_accept_ratio = log(0)
+}
+
+bool= (log(runif(1)) < ln_accept_ratio)
+
+if (bool){
+  Niter_centers[[n]] = c_k_prime
+  parameter_means_proposal[[n]] = m_t
+  Nclusters[n] = new_k
+  sum_loss[n] = s_loss_prime
+}else{
+  Niter_centers[[n]] = Niter_centers[[n-1]]
+  parameter_means_proposal[[n]] = parameter_means_proposal[[n-1]]
+  Nclusters[n] = Nclusters[n-1]
+  sum_loss[n] = sum_loss[n-1]
+}
+
+nb_of_clusters[t] = Nclusters[N_iterations]
+pred_centers[[t]]= Niter_centers[[N_iterations]]
+predicted_loss[t] = instantaneous_loss(pred_centers[[t]], mydata[t,])
+
+labels = labels_function(pred_centers[[T]], mydata)
+
