@@ -1,7 +1,6 @@
 
 
 
-
 #####
 library('PACBO')
 setwd("~/Desktop/ENSAE_MS/S2/PAC_bayesian_online_clustering")
@@ -44,7 +43,7 @@ predicted_loss[1] = instantaneous_loss(pred_centers[[1]], mydata[1,])
 
 
 
-t=2
+t=3
 
 
 
@@ -66,10 +65,22 @@ proposal_loss[1:(t-1)] = apply(matrix(mydata[1:(t-1),], nrow = t-1), 1, function
 sum_loss[1] = sum(proposal_loss[1:(t-1)]) + 0.5 * sum(lambda_2 * (proposal_loss - predicted_loss)^2)
 
 
+# Check
 
 
-n = 2
+tau_proposal
+Nclusters
+parameter_means_proposal
+length(Niter_centers)
+proposal_loss
+sum_loss
 
+
+
+
+
+#n = 4
+for (n in 2:N_iterations){
 
 
 
@@ -118,10 +129,39 @@ if (bool){
   Nclusters[n] = Nclusters[n-1]
   sum_loss[n] = sum_loss[n-1]
 }
+}
+### Check
+proposal_loss_temp
+transition_prob
+new_k
+m_t
+c_k_prime
+ln_division
+s_loss_prime
+ln_accept_ratio
+bool
+Niter_centers
+parameter_means_proposal
+Nclusters
+sum_loss
+
+
+
+# 
 
 nb_of_clusters[t] = Nclusters[N_iterations]
 pred_centers[[t]]= Niter_centers[[N_iterations]]
 predicted_loss[t] = instantaneous_loss(pred_centers[[t]], mydata[t,])
+
+instantaneous_loss(pred_centers[[t]], mydata[t,])
+
+##Check
+nb_of_clusters
+pred_centers
+predicted_loss
+
+
+#
 
 labels = labels_function(pred_centers[[T]], mydata)
 
