@@ -10,10 +10,7 @@ mydata <- mydata[,2:length(mydata[1,])]
 R <- max(sqrt(rowSums(mydata^2)))
 
 
-PACBO(mydata, R, coeff = 2, K_max = 50,var_ind = TRUE, N_iterations = 500)
-
-
-
+PACBO(mydata, R, coeff = 2, K_max = 50,var_ind = TRUE, N_iterations = 500, plot_ind=TRUE)
 
 
 
