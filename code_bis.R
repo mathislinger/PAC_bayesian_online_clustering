@@ -1,3 +1,19 @@
+library('PACBO')
+setwd("~/Desktop/ENSAE_MS/S2/PAC_bayesian_online_clustering")
+
+coeff = 2
+K_max = 50
+N_iterations = 500
+mydata <- read.csv('test.csv')
+mydata <- as.matrix(sapply(mydata, as.numeric)) 
+mydata <- mydata[,2:length(mydata[1,])]
+R <- max(sqrt(rowSums(mydata^2)))
+
+
+PACBO(mydata, R, coeff = 2, K_max = 50,var_ind = TRUE, N_iterations = 500)
+
+
+
 
 
 
@@ -43,7 +59,7 @@ predicted_loss[1] = instantaneous_loss(pred_centers[[1]], mydata[1,])
 
 
 
-t=3
+t=4
 
 
 
@@ -64,6 +80,8 @@ proposal_loss[1:(t-1)] = apply(matrix(mydata[1:(t-1),], nrow = t-1), 1, function
 
 sum_loss[1] = sum(proposal_loss[1:(t-1)]) + 0.5 * sum(lambda_2 * (proposal_loss - predicted_loss)^2)
 
+sqrt(rowSums(Niter_centers[[1]]^2))
+
 
 # Check
 
@@ -71,11 +89,9 @@ sum_loss[1] = sum(proposal_loss[1:(t-1)]) + 0.5 * sum(lambda_2 * (proposal_loss 
 tau_proposal
 Nclusters
 parameter_means_proposal
-length(Niter_centers)
+Niter_centers
 proposal_loss
 sum_loss
-
-
 
 
 
@@ -153,7 +169,6 @@ nb_of_clusters[t] = Nclusters[N_iterations]
 pred_centers[[t]]= Niter_centers[[N_iterations]]
 predicted_loss[t] = instantaneous_loss(pred_centers[[t]], mydata[t,])
 
-instantaneous_loss(pred_centers[[t]], mydata[t,])
 
 ##Check
 nb_of_clusters
