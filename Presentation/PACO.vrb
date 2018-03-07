@@ -1,0 +1,19 @@
+\frametitle{The PACO algorithm}
+\begin{itemize}
+\item Let $\rho_{k'}(., c_{k'}, \tau_{k'})$ denote the multivariate Student distribution on $\mathds{R}^{dk'}$:\\
+
+$
+\rho_{k'}(c, c_{k'}, \tau_{k'}) = \prod_{j=1}^{k'} \left\{       C_{\tau_{k'}}^{-1} \left( 1+ \frac{|c_{j}-c_{k',j}|_{2}^{2}}{6\tau_{k'}^{2}}     \right)^{-\frac{3+d}{2}}  \right\}dc
+$,\\
+where $C_{\tau_{k'}}^{-1}$ is the normalizing constraint\\
+
+\item First a local move from $k^{(n)}$ to $k'$ is proposed by choosing \\
+$k' \in [k^{(n)}-1, k^{n}+1]$ with probability $q(k^{(n)},.)$
+
+\item Next, choosing $d_{1} =dk'$, $d_{2}=dk^{(n)}$, we sample $\nu_{1}$ from $\rho_{k'}$
+
+\item Finally, the pair $(\nu_{2}, c')$ is obtained by $(\nu_{2}, c') = g(\nu_{1}, c^{(n)})$, where\\
+$g:(x,y)\in \mathds{R}^{dk'}x\mathds{R}^{dk^{(n)}} \rightarrow (y,x) \in \mathds{R}^{dk^{(n)}}x\mathds{R}^{dk'}$
+
+
+\end{itemize}

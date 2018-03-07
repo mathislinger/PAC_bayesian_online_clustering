@@ -1,0 +1,271 @@
+\documentclass[10pt]{beamer}
+
+\usetheme[progressbar=frametitle]{metropolis}
+\usepackage{appendixnumberbeamer}
+\usepackage{indentfirst}
+\usepackage{booktabs}
+\usepackage[scale=2]{ccicons}
+\usepackage{bbm}
+\usepackage{mathrsfs}
+\usepackage{dsfont}
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
+\usepackage{xspace}
+\newcommand{\themename}{\textbf{\textsc{PAC-Bayesian Online Clustering}}\xspace}
+
+\title{PAC-Bayesian Online Clustering}
+\subtitle{Le li, Benjamin Guedj, Sébastien Loustau}
+% \date{\today}
+\date{}
+\author{Mathis Linger, Selim Dekali}
+\institute{ENSAE}
+% \titlegraphic{\hfill\includegraphics[height=1.5cm]{logo.pdf}}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Table of contents}
+  \setbeamertemplate{section in toc}[sections numbered]
+  \tableofcontents[hideallsubsections]
+\end{frame}
+
+\section{Notation}
+
+\begin{frame}[fragile]{Notation}
+\begin{itemize}
+\item $(x_{t})_{1:T}$ : online dataset, where $x_{t} \in \mathbb{R}^{d}$\\
+\item $K_{t}$: nb of clusters\\
+\item $\hat{c}_{t} = (\hat{c}_{t,1}, \hat{c}_{t,2},...\hat{c}_{t,K_{t}})$ : clusters location, depending on past information $(x_{s})_{1:(t-1)}$ and 
+$(\hat{c}_{s})_{1:(t-1)} $\\
+
+\smallbreak
+\item When $x_{t}$ is newly revealed, the instantaneous loss:\\
+\qquad $\ell(\hat{c}_{t}, x_{t}) = \underset{1 \leq k \leq K_{t}}{min} |\hat{c}_{t,k} - x_{t}|^{2}_{2}$\\
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Notation}
+\begin{itemize}
+\item $\mathscr{C} = \bigcup^{p}_{k=1}$\\
+\item q: discrete probability distribution on the set [1,p]:={1,..p}\\
+for any k $\in$ [1,p], let $\pi_{k}$, the probability distribution on $\mathbb{R}^{dk}$\\
+\smallbreak
+\item For any c $\in \mathscr{C}$, we define $\pi(c)$, as\\
+\qquad $\pi(c)= \sum_{k \in [1,p]} q(k) \mathbbm{1}_{\{ c\in\mathbb{R}^{dk}\}} \pi_{k}(c)$
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Notation}
+\begin{itemize}
+\item $c \in \mathscr{C}$ a partition of $\mathbb{R}^{d}, \pi \in \mathbb{P}(\mathscr{C})$ a quasi prior over this set\\
+\item $\lambda >0$ : inverse temperature parameter\\
+\smallbreak
+\item At each time t, we observe $x_{t}$ and a random partition $\hat{c}_{t+1} \in \mathscr{C}$ is sampled from the quasi-posterior:\\
+$d\hat{\rho}_{t+1} \propto \exp{\{ -\lambda S_{t}(c) \}}
+d\pi(c)$\\
+\smallbreak
+\item Cumulative loss:\\
+$S_{t}(c) = S_{t-1}(c) + \ell (c, x_{t}) + \frac{\lambda}{2}
+\{ \ell(c, x_{t}) - \ell (\hat{c}_{t},  x_{t}) \}^{2}$\\
+\end{itemize}
+\end{frame}
+
+\section{Sparcity Regret Bounds}
+
+\begin{frame}{Sparcity Regret Bounds}
+\begin{block}{\underline{Algo 1: The PAC-Bayesian online Clustering algorithm}}
+1: Input parameters: $p>0, \pi \in \mathscr{P}(\mathscr{C}), \lambda >0 \text{ and }S_{0}=0$\\
+2: Initialization: Draw $\hat{c}_{1} \sim \pi$\\
+3: For $t \in [1, T-1]:$\\
+4: \quad Get the data $x_{t}$\\
+5: \quad Draw $\hat{c}_{t+1} \sim \hat{\rho}_{t+1}(c)$ where $d\hat{\rho}_{t+1} \propto \exp{\{ -\lambda S_{t}(c) \}}
+d\pi(c)$, and \\
+\hspace*{2cm} $S_{t}(c) = S_{t-1}(c) + \ell (c, x_{t}) + \frac{\lambda}{2}
+\{ \ell(c, x_{t}) - \ell (\hat{c}_{t},  x_{t}) \}^{2}$\\
+6: End for
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Sparcity Regret Bounds}
+\begin{block}{\underline{Theorem 1:}}
+For any $(x_{t})_{1:T} \in \mathscr{R}^{dT}$,
+any quasi prior $\pi \in \mathscr{P}(\mathscr{C})$, any $\lambda >0$,\\
+\smallbreak 
+the procedure described in Algo 1 satisfies:\\
+\smallbreak
+$
+\sum_{t=1}^{T} \mathds{E}_{(\hat{\rho}_{1},\hat{\rho}_{2},...\hat{\rho}_{t})}
+\ell(\hat{c}_{t}, x_{t}) \leq  \underset{\rho \in \mathscr{P}_{\pi}(\mathscr{C})}{inf}  \left\{ \mathds{E}_{c \sim \rho} [ \sum_{t=1}^{T} \ell (c, x_{t}) ] +
+\frac{\mathcal{K}(\rho, \pi)}{\lambda} + 
+\frac{\lambda}{2} \mathds{E}_{(\hat{\rho}_{1},\hat{\rho}_{2},...\hat{\rho}_{T})} \mathds{E}_{c \sim \rho} \sum_{t=1}^{T} [\ell (c, x_{t}) - \ell (\hat{c}_{t}, x_{t})]^{2} \right\}
+$
+\end{block}
+\end{frame}
+
+\begin{frame}[fragile]{Sparcity Regret Bounds}
+The regret bound could be refine when :\\
+\begin{itemize}
+\item $q(k) = \frac{\exp{-\eta k}}{\sum_{i=1}^{p}\exp{-\eta i}}$, with $\eta >0$.\\
+\item $d\pi_{k}(c, R) = \left(\frac{\Gamma (\frac{d}{2}+1)}{\pi^{\frac{d}{2}}} \right) \frac{1}{(2R)^{dk}} \left\{ \prod_{j=1}^{k} \mathbbm{1}_{\{ \mathbb{B}_{d}(2R) \} }(c_{j}) \right\} dc$
+\smallbreak
+\begin{block}{\underline{Corollary 1:}}
+$\sum_{t=1}^{T} \mathds{E}_{(\hat{\rho}_{1},\hat{\rho}_{2},...\hat{\rho}_{t})}             \ell (\hat{c}_{t}, x_{t}) \leq                                     \underset{k \in [1,p]}{inf} \left\{                                       \underset{c \in \mathscr{C}(k,R)}{inf} \sum_{t=1}^{T}  \ell (c, x_{t})   +\frac{dk}{2\lambda}\log{\frac{8R^{2}\lambda T}{d=2}}+\frac{\eta}{\lambda}k \right\}
++ \left( \frac{\log{p}}{\lambda} +\frac{d}{2\lambda} +\frac{\lambda T C_{1}^{2}}{2} \right)$
+\smallbreak
+where $C_{1}=(2R+max_{t=1..T}|x_{t}|_{2})^{2} $
+\end{block}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Sparcity Regret Bounds}
+The below calibration yields a sublinear remainder term: :\\
+\begin{itemize}
+\item $\lambda = \frac{d+2}{2\sqrt{T}R^{2}}$\\
+\end{itemize}
+\smallbreak
+\begin{block}{\underline{Corollary 2:}}
+$\sum_{t=1}^{T} \mathds{E}_{(\hat{\rho}_{1},\hat{\rho}_{2},...\hat{\rho}_{t})}             \ell (\hat{c}_{t}, x_{t}) \leq                                     \underset{k \in [1,p]}{inf} \left\{                                       \underset{c \in \mathscr{C}(k,R)}{inf} \sum_{t=1}^{T}  \ell (c, x_{t})   +k\frac{dR^{2}}{d+2}\sqrt{T}\log{4\sqrt{T}}+ k \frac{2R^{2}\eta}{d+2}\sqrt{T} \right\}
++ \left( \frac{2R^{2}\log{p}}{d+2} +\frac{dR^{2}}{d+2} +\frac{(d+2) C_{1}^{2}}{4R^{2}} \right) \sqrt{T}$
+\smallbreak
+Hence, if there exist $k^{*}$, and $c^{*} \in \mathscr{C}(k^{*}, R)$, which achieve the infimum:
+$
+\sum_{t=1}^{T} \mathds{E}_{(\hat{\rho}_{1},\hat{\rho}_{2},...\hat{\rho}_{t})} \ell (\hat{c}_{t}, x_{t}) - \sum_{t=1}^{T} \ell (c^{*}, x_{t}) \leq J k^{*}\sqrt{T}\log{T}
+$
+\smallbreak
+J: constant depending on d,R, $\log{p}$ and $C_{1}^{2} $\\
+Then the regret of the expected cumulative loss is sublinear in T.
+\end{block}
+\end{frame}
+
+
+
+\section{Adaptative Sparcity Regret Bounds}
+
+\begin{frame}{Adaptative Sparcity Regret Bounds}
+T is usually unknown, prompting us to choose $\lambda = \lambda_{t}$
+\smallbreak
+\begin{block}{\underline{Algo 1: The adaptative PAC-Bayesian online Clustering algorithm}}
+1: Input parameters: $p>0, \pi \in \mathscr{P}(\mathscr{C}), (\lambda_{t})_{0:T} >0 \text{ and }S_{0}=0$\\
+2: Initialization: Draw $\hat{c}_{1} \sim \pi$\\
+3: For $t \in [1, T-1]:$\\
+4: \quad Get the data $x_{t}$\\
+5: \quad Draw $\hat{c}_{t+1} \sim \hat{\rho}_{t+1}(c)$ where $d\hat{\rho}_{t+1} \propto \exp{\{ -\lambda_{t} S_{t}(c) \}}
+d\pi(c)$, and \\
+\hspace*{2cm} $S_{t}(c) = S_{t-1}(c) + \ell (c, x_{t}) + \frac{\lambda_{t-1}}{2}
+\{ \ell(c, x_{t}) - \ell (\hat{c}_{t},  x_{t}) \}^{2}$\\
+6: End for
+\end{block}
+\end{frame}
+
+
+\begin{frame}{Adaptative Sparcity Regret Bounds}
+\begin{block}{\underline{Theorem 2:}}
+For any $(x_{t})_{1:T} \in \mathscr{R}^{dT}$,
+any quasi prior $\pi \in \mathscr{P}(\mathscr{C})$, \\
+if $(\lambda_{t})_{0:T}$ a non-increasing sequence of positive numbers,\\
+\smallbreak 
+the procedure described in Algo 2 satisfies:\\
+\smallbreak
+$
+\sum_{t=1}^{T} \mathds{E}_{(\hat{\rho}_{1},\hat{\rho}_{2},...\hat{\rho}_{t})}
+\ell(\hat{c}_{t}, x_{t}) \leq  \underset{\rho \in \mathscr{P}_{\pi}(\mathscr{C})}{inf}  \left\{ \mathds{E}_{c \sim \rho} [ \sum_{t=1}^{T} \ell (c, x_{t}) ] +
+\frac{\mathcal{K}(\rho, \pi)}{\lambda_{T}} + 
+\mathds{E}_{(\hat{\rho}_{1},\hat{\rho}_{2},...\hat{\rho}_{T})} \mathds{E}_{c \sim \rho} \left[ \sum_{t=1}^{T} \frac{\lambda_{t-1}}{2} [\ell (c, x_{t}) - \ell (\hat{c}_{t}, x_{t})]^{2} \right] \right\}
+$
+\end{block}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Adaptative Sparcity Regret Bounds}
+keeping previous setting for q and $\pi_{k}$, with $\eta \geq 0$ and $R\geq \underset{t=1..T}{max} |x_{t}|_{2}$\\
+The below adaptative calibration for any $t\in [1,T] and \lambda_{0}=1$: :\\
+\begin{itemize}
+\item $\lambda_{t} = \frac{d+2}{2\sqrt{t}R^{2}}$\\
+\end{itemize}
+\smallbreak
+\begin{block}{\underline{Corollary 2:}}
+Then the algorithm 2 satisfies:\\
+$\sum_{t=1}^{T} \mathds{E}_{(\hat{\rho}_{1},\hat{\rho}_{2},...\hat{\rho}_{t})}             \ell (\hat{c}_{t}, x_{t}) \leq                                     \underset{k \in [1,p]}{inf} \left\{                                       \underset{c \in \mathscr{C}(k,R)}{inf} \sum_{t=1}^{T}  \ell (c, x_{t})   +\frac{dkR^{2}}{d+2}\sqrt{T}\log{4\sqrt{T}}+ k \frac{2R^{2}\eta}{d+2}\sqrt{T} \right\}
++ \left( \frac{2R^{2}\log{p}}{d+2} +\frac{dR^{2}}{d+2} +\frac{(d+2) C_{1}^{2}}{2R^{2}} \right) \sqrt{T}$
+\smallbreak
+The adaptative Algorithm 2 is supported by a sparcity regret bound with rate $\sqrt{T}\log{T}$.
+\end{block}
+\end{frame}
+
+
+\section{The PACO algorithm}
+
+
+\begin{frame}[fragile]{The PACO algorithm}
+\begin{itemize}
+\item Since direct sampling from the quasi-posterior $\hat\rho_{t}$ is isually not possible, we will focus on a stochastic approximation, called PACO.
+
+\item Approximate $\hat\rho_{t}$ through MCMC, favoring local move.
+
+\item States of interest of the MC $(k^{(n)}, c^{(n)})_{0 \leq n \leq N}$,\\ where $k^{(n)} \in [1,p]$ and $c^{(n)} \in \mathds{R}^{dk^{(n)}}$ 
+
+\item At each iteration, from $(k^{(n)}, c^{(n)})$ to proposal state $(k', c')$\\
+Hence $c^{(n)} \in \mathds{R}^{dk^{(n)}}$, and $c' \in \mathds{R}^{dk'}$ may be of different dimensions $(k' \neq k^{(n)})$\\
+We create auxilary vectors $\nu_{1}, \nu_{2}$ to compensate for dimensional difference $(d_{1}, d_{2})$ s.t. $dk^{(n)} + d_{1} = dk' + d_{2}$\\
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{The PACO algorithm}
+\begin{itemize}
+\item Let $\rho_{k'}(., c_{k'}, \tau_{k'})$ denote the multivariate Student distribution on $\mathds{R}^{dk'}$:\\
+
+$
+\rho_{k'}(c, c_{k'}, \tau_{k'}) = \prod_{j=1}^{k'} \left\{       C_{\tau_{k'}}^{-1} \left( 1+ \frac{|c_{j}-c_{k',j}|_{2}^{2}}{6\tau_{k'}^{2}}     \right)^{-\frac{3+d}{2}}  \right\}dc
+$,\\
+where $C_{\tau_{k'}}^{-1}$ is the normalizing constraint\\
+
+\item First a local move from $k^{(n)}$ to $k'$ is proposed by choosing \\
+$k' \in [k^{(n)}-1, k^{n}+1]$ with probability $q(k^{(n)},.)$
+
+\item Next, choosing $d_{1} =dk'$, $d_{2}=dk^{(n)}$, we sample $\nu_{1}$ from $\rho_{k'}$
+
+\item Finally, the pair $(\nu_{2}, c')$ is obtained by $(\nu_{2}, c') = g(\nu_{1}, c^{(n)})$, where\\
+$g:(x,y)\in \mathds{R}^{dk'}x\mathds{R}^{dk^{(n)}} \rightarrow (y,x) \in \mathds{R}^{dk^{(n)}}x\mathds{R}^{dk'}$
+
+
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}{The PACO algorithm}
+\begin{block}{\underline{Algo 3: PACO}}
+1: Initialization: $(\lambda_{t})$\\
+2: For $t \in [1, T-1]:$\\
+3: Initialization: $(k^{(0)}, c^{(0)}) \in [1,p] x \mathds{R}^{dk^{(0)}} $\\
+4: For $n \in [1, N-1]:$\\
+5: \quad Sample $k' \in [k^{n}-1, k{n}+1]$ from $q(k^{(n)}, .)=1/3$\\
+6: \quad Let $c' \leftarrow$ standard k-means output.\\
+7: \quad Let $\tau' =  1/ \sqrt{pt}$.\\
+8: \quad Sample $\nu_{1} \sim \rho_{k'}(.,c_{k'}, \tau_{k'})$ .\\
+9: \quad Let $(\nu_{2}, c') = g((\nu_{1}, c^{(n)})$.\\
+10: \quad Accept the move $(k^{(n)}, c^{(n)}) = (k',c')$ with probability\\
+$\alpha \left[  (k^{(n)}, c^{(n)}) , (k',c') \right]$
+$= min \left\{ 1, \frac{\hat{\rho}_{t}(c')q(k', k^{(n)})\rho_{k^{(n)}}(c^{(n)}, c_{k^{(n)}}, \tau_{k^{(n)}})}{\hat{\rho}_{t}(c^{(n)})q(k^{(n)},k') \rho'(c', c_{k'}, \tau_{k'})}   \right\}  $\\
+11: \quad Else $(k^{n+1}, c^{n+1}) = (k^{n}, c^{n})$\\
+12: End for\\
+13: Let $\hat{c}_{t} = c^{(N)}$.\\
+14: End for
+\end{block}
+\end{frame}
+
+
+
+\section{Numercial studies}
+
+
+
+
+
+\end{document}

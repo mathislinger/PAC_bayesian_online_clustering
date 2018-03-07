@@ -1,0 +1,6 @@
+\beamer@endinputifotherversion {3.36pt}
+\beamer@sectionintoc {1}{Notation}{3}{0}{1}
+\beamer@sectionintoc {2}{Sparcity Regret Bounds}{7}{0}{2}
+\beamer@sectionintoc {3}{Adaptative Sparcity Regret Bounds}{12}{0}{3}
+\beamer@sectionintoc {4}{The PACO algorithm}{16}{0}{4}
+\beamer@sectionintoc {5}{Numercial studies}{20}{0}{5}
